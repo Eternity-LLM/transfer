@@ -1,4 +1,5 @@
 import json
+import sys
 from typing import Union, List
 
 MAPPING = {}
@@ -6,7 +7,7 @@ with open('search_prompt.txt', mode='r', encoding='utf-8') as f:
     SEARCH_PROMPT = f.read()
 
 class Message:
-    def __init__(self, files:list, model:str, fragments:dict, inserted_at:str,*_, **__)->None:
+    def __init__(self, files:list, model:str, fragments:list, inserted_at:str, *_, **__)->None:
         self.files = files if len(files) else None
         self.model = model
         self.msg = []
@@ -40,20 +41,39 @@ class TreeNode:
     def __init__(self, id:str, parent:str, children:list, message:list, *_, **__):
         self.id = id
         self.parent = MAPPING.get(parent, None)
-        self.children = [MAPPING.get(c) for c in children]
-        self.message = Message(**message)
+        self.children = [MAPPING.get(c) for c in children] if children is not None else []
+        self.message = Message(**message) if message is not None else None
+        if self not in self.parent.children:
+            self.parent.add_child(self)
     def add_child(self, child_node:Union[str, 'TreeNode']):
         self.children.append(child_node) if isinstance(child_node, TreeNode) else MAPPING.get(child_node)
     def __getitem__(self, key):
         return self.children[key]
 
 
+# Main program
+def write():
+    global MAPPING
+    pass
 
-def load_conversations(file_path):
+def transfer(file_path):
+    global MAPPING
     with open(file_path, 'r', encoding='utf-8') as file:
         conversations = json.load(file)
-    #print(conversations[0])
     for c in conversations:
-        pass
-
-load_conversations('conversations.json')
+        MAPPING = {}
+        date = c['inserted_at'][:10]
+        for mk, mv in c['mapping'].keys(), c['mapping'].values():
+            MAPPING[mk]=TreeNode(**mv)
+        try:
+            MAPPING['root'].message = Message(
+                files=[],
+                model='deepseek-chat',
+                fragments=[{
+                    'role':'system',
+                    'content':'改助手为DeepSeek-Chat，由深度求索公司制造。\\n今天是'+date
+                }],
+                inserted_at=c['inserted_at']
+            )
+        except Exception as e:
+            print(f'{type(e).__name__}: {str(e)}', file=sys.stderr)
