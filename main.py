@@ -1,7 +1,26 @@
 import json
-from typing import Union
+from typing import Union, List
 
 MAPPING = {}
+
+class Message:
+    def __init__(self, files:List[str], model, fragments:dict)->None:
+        self.files = files if len(files) else None
+        self.model = model
+        self.msg = []
+        last_msg = None
+        for m in fragments:
+            content = m['content']
+            if last_msg is not None:
+                content = last_msg + content
+            if m['type'] == 'REQUEST':
+                self.msg.append({'role':'user', 'content':content})
+                last_msg = None
+            elif m['type'] == 'THINK':
+                last_msg = f'<think>{content}</think>'
+            else:
+                self.msg.append({'role':'assistant', 'content':content})
+
 
 class TreeNode:
     def __init__(self, id, parent, children, message, *args, **kwargs):
