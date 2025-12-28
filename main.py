@@ -25,10 +25,16 @@ class Message:
                 else:
                     self.msg.append({'role':'assistant', 'content':content})
             else:
-                res = '# 以下内容是基于用户发送的消息的搜索结果:'
+                res = ''
                 for idx, site in enumerate(m['results']):
                     res += f'[webpage {idx} begin]{site['snippet']}[webpage {idx} end]'
-                res += f'\n{SEARCH_PROMPT}\n' + f'- 今天是{self.date}'
+                res += f'\\n{SEARCH_PROMPT}\\n' + f'- 今天是{self.date}'
+                self.msg.append({'role':'system', 'content':''})
+                if self.msg[-2]['role']=='user':
+                    self.msg[-1]['content'] = f'以下内容是基于用户的问题的搜索结果：\\n{res}'
+                    self.msg.append(self.msg.pop(-2))
+                else:
+                    self.msg[-1]['content'] = f'以下内容是系统搜索结果：\\n{res}'
 
 class TreeNode:
     def __init__(self, id:str, parent:str, children:list, message:list, *_, **__):
