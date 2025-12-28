@@ -2,12 +2,15 @@ import json
 from typing import Union, List
 
 MAPPING = {}
+with open('search_prompt.txt', mode='r', encoding='utf-8') as f:
+    SEARCH_PROMPT = f.read()
 
 class Message:
-    def __init__(self, files:list, model:str, fragments:dict, *_, **__)->None:
+    def __init__(self, files:list, model:str, fragments:dict, inserted_at:str,*_, **__)->None:
         self.files = files if len(files) else None
         self.model = model
         self.msg = []
+        self.date = inserted_at[:10]
         last_msg = None
         for m in fragments:
             if m['type'] != 'SEARCH':
@@ -22,11 +25,10 @@ class Message:
                 else:
                     self.msg.append({'role':'assistant', 'content':content})
             else:
-                res = ''
+                res = '# 以下内容是基于用户发送的消息的搜索结果:'
                 for idx, site in enumerate(m['results']):
-                    res += site['snippet']
-
-
+                    res += f'[webpage {idx} begin]{site['snippet']}[webpage {idx} end]'
+                res += f'\n{SEARCH_PROMPT}\n' + f'- 今天是{self.date}'
 
 class TreeNode:
     def __init__(self, id:str, parent:str, children:list, message:list, *_, **__):
