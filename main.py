@@ -26,7 +26,7 @@ class Message:
                     self.msg.append({'role':'assistant', 'content':content})
             else:
                 res = ''
-                for idx, site in enumerate(m['results']):
+                for idx, site in enumerate(m['results'], start=1):
                     res += f'[webpage {idx} begin]\\n来自 {site['site_name']} {site['url']}\\n{site['snippet']}\\n[webpage {idx} end]'
                 res += f'\\n{SEARCH_PROMPT}\\n' + f'- 今天是{self.date}'
                 self.msg.append({'role':'system', 'content':''})
