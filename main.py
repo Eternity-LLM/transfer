@@ -27,7 +27,7 @@ class Message:
             else:
                 res = ''
                 for idx, site in enumerate(m['results']):
-                    res += f'[webpage {idx} begin]{site['snippet']}[webpage {idx} end]'
+                    res += f'[webpage {idx} begin]\\n来自 {site['site_name']} {site['url']}\\n{site['snippet']}\\n[webpage {idx} end]'
                 res += f'\\n{SEARCH_PROMPT}\\n' + f'- 今天是{self.date}'
                 self.msg.append({'role':'system', 'content':''})
                 if self.msg[-2]['role']=='user':
