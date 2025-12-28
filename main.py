@@ -79,3 +79,5 @@ def transfer(file_path):
             )
         except Exception as e:
             print(f'{type(e).__name__}: {str(e)}', file=sys.stderr)
+        write()
+        print(f'Conversation {idx}/{total} is written successfully.')
