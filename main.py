@@ -1,5 +1,6 @@
 import json
 import sys
+from tqdm import tqdm
 from typing import Union, List
 
 MAPPING = {}
@@ -60,11 +61,12 @@ def transfer(file_path):
     global MAPPING
     with open(file_path, 'r', encoding='utf-8') as file:
         conversations = json.load(file)
-    for c in conversations:
+    total = len(conversations)
+    for idx, c in enumerate(conversations, start=1):
         MAPPING = {}
         date = c['inserted_at'][:10]
-        for mk, mv in c['mapping'].keys(), c['mapping'].values():
-            MAPPING[mk]=TreeNode(**mv)
+        for mk in tqdm(c['mapping'].keys(), desc=f'Conversation {idx}/{total}'):
+            MAPPING[mk]=TreeNode(**c['mapping'][mk])
         try:
             MAPPING['root'].message = Message(
                 files=[],
