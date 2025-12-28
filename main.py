@@ -10,16 +10,22 @@ class Message:
         self.msg = []
         last_msg = None
         for m in fragments:
-            content = m['content']
-            if last_msg is not None:
-                content = last_msg + content
-            if m['type'] == 'REQUEST':
-                self.msg.append({'role':'user', 'content':content})
-                last_msg = None
-            elif m['type'] == 'THINK':
-                last_msg = f'<think>{content}</think>'
+            if m['type'] != 'SEARCH':
+                content = m['content']
+                if last_msg is not None:
+                    content = last_msg + content
+                if m['type'] == 'REQUEST':
+                    self.msg.append({'role':'user', 'content':content})
+                    last_msg = None
+                elif m['type'] == 'THINK':
+                    last_msg = f'<think>{content}</think>'
+                else:
+                    self.msg.append({'role':'assistant', 'content':content})
             else:
-                self.msg.append({'role':'assistant', 'content':content})
+                res = ''
+                for idx, site in enumerate(m['results']):
+                    res += site['snippet']
+
 
 
 class TreeNode:
